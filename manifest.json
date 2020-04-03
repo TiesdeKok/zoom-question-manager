@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "Zoom Teaching Helper",
+  "version": "0.20",
+  "content_scripts": [
+      {
+        "matches": [
+          "https://*.zoom.us/wc/*"
+        ],
+        "js": ["jquery-3.4.1.js", "content.js", "popper.min.js", "bootstrap.min.js"],
+        "css" : ["bootstrap.min.css"]
+      }
+    ],
+  "web_accessible_resources": [
+      "viewerWindow.html"
+        ], 
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+      "name": "Click to start the Zoom helper."
+  }
+}

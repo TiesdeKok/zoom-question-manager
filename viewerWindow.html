@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat window</title>
+</head>
+
+
+
+<body>
+    
+    <style type="text/css">
+
+        #instructions-content {
+            background: #FCF9CE;
+        }
+
+        .radio-hor {
+            margin-right: 2px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .example-box {
+            background: #FFFFFF;
+            border: dashed 1px #A0A0A0;
+            color: #000000;
+            padding: 10px;
+            text-align: left;
+            font-size: x-large;
+        }
+
+        .example-box-disabled {
+            background: #E0E0E0;
+            border: dashed 1px #A0A0A0;
+            color: #888888;
+            padding: 10px;
+            text-align: left;
+            font-size: x-large;
+        }
+
+        .panel {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        span.cur {
+            background-color: yellow;
+        }
+
+        span.selected {
+            background-color: yellowgreen;
+        }
+
+        span.entity {
+            background-color: orange;
+        }
+
+        span.misc {
+            background-color: lightgrey;
+        }
+
+        span.notent {
+            background-color: red;
+        }
+
+        span.disabled {
+            background-color: #E0E0E0;
+        }
+
+        span.white {
+            background-color: #FFFFFF;
+        }
+
+        #main_body {
+            margin: 30px;
+        }
+
+        .navbar {
+            width:100%;
+            margin-bottom: 20px;
+            font-size: 20pt;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            margin-right: 10px;
+        }
+
+        .question-element {
+            width: 100%;
+            margin-bottom:20px;
+        }
+
+        .chat-element {
+            width: 100%;
+            margin-bottom:10px;
+        }
+
+        .card-header {
+            font-size:20pt;
+            font-weight:bold;
+        }
+
+        .card-text {
+            font-size: 40pt;
+            text-align: left;
+            line-height: 50pt;
+        }
+
+        .highlighted {
+            background: #fff793;
+        }
+
+        .answered {
+            background-color: #ccef86;
+        }
+
+        .ws-disc {
+            color: darkred;
+        }
+
+        .ws-conn {
+            color: darkgreen;
+        }
+
+        .mic-bar {
+            font-size: 20pt;
+            text-align: center;
+            margin-top: -17px;
+            padding-top: 3px;
+            padding-bottom: 4px;
+            width: 99%;
+        }
+
+        .active-question-list {
+            flex: 0 0 70%px; 
+        }
+
+        .active-chat-list {
+            flex: 0 0 30%px; 
+        }
+
+        .card-header-chat {
+            font-size: 15pt;
+            padding-top: 5pt;
+            padding-bottom: 5pt;
+        }
+
+        .card-text-chat {
+            font-size: 30pt;
+            line-height: 30pt;
+            padding-bottom: 0pt;
+        }
+
+        #video-container {
+            width: 100%;
+        }
+
+        #videoElement {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        #audioMeter {
+            width: 100%;
+            height: 98%;
+        }
+
+        .chat-mute-btn {
+            position: absolute;
+            right: 0;
+            margin-right: 15px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .main-container {
+            max-width: 100% !important; 
+            width: 100% !important; 
+            padding-left:0pt;
+            padding-right:0pt;
+        }
+        
+        #chat-col {
+            padding-left: 0pt;
+            padding-right: 0pt;
+        }
+
+        #current-questions {
+            padding-left: 0pt;
+            padding-right: 10pt;  
+        }
+
+        @media (max-width: 765px) {
+            #current-questions {
+                padding-right: 0pt;  
+            }  
+        }
+
+    </style>
+    
+    <script>
+        // Debug indicator
+        var DEBUG = true;    
+    </script>
+
+    <div id="main_body">
+    
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" id="nav-current" href="#">Current <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="nav-history" href="#">History</a>
+                    </li>
+                    <li class="nav-item" style='margin-left: 0px; margin-top:5px;'>
+                        <button class="btn btn-outline-light my-2 my-sm-0" id='b-cam'>Start Webcam</button>
+                    </li>
+                    <li class="nav-item" style='margin-left: 0px; margin-top:5px;'>
+                        <button class="btn btn-outline-light my-2 my-sm-0" id='b-audio' style='display:none;'>Start Audio Meter</button>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+        
+        <div class="tab-content">
+
+            <div style='display:none;'>
+                <template id='q-template'>
+                    <div class="card-header">
+                        <span class="q-time">TBD</span> -
+                        <span class='q-owner'>TBD</span>
+                    </div>
+                    <div class="card-body">
+                    <p class="card-text">TBD</p>
+                    <button class='btn btn-success btn-lg b-answered' style='margin-right: 10px;'> Answered </button>
+                    <button class='btn btn-warning btn-lg b-highlight' style='margin-right: 10px;'> Highlight </button>
+                    <button class='btn btn-primary btn-lg b-hide'> Archive </button>
+                    <button class='btn btn-primary btn-lg b-revert' style='display:none;'> Revert </button>
+                    </div>                
+                </template>
+
+                <template id='chat-template'>
+                    <div class="card-header card-header-chat">
+                        <span class="q-time">TBD</span> -
+                        <span class='q-owner'>TBD</span>
+                        <button class='btn btn-sm chat-mute-btn btn-outline-primary'>Hide</button>
+                    </div>
+                    <div class="card-body">
+                    <p class="card-text card-text-chat">TBD</p>
+                    </div>                
+                </template>
+            </div>
+            
+            <!-- Start tab -->
+
+            
+            <div class='tab-pane active container main-container'>
+
+                <div class = "row">
+                    <div class='col-md-8 question-list' id = "current-questions" style='padding-left 0pt;'>
+
+                    </div>
+                    <div class='col-md-4' id='chat-col'>
+                        <div id="video-container" class='row' style='display:none;'>
+                            <div class='col-md-11 col-10'>
+                                <video autoplay="true" id="videoElement"></video>
+                            </div>
+                            <div class='col-md-1 col-2' style='padding: 0px;'>
+                                <canvas id="audioMeter" ></canvas>
+                            </div>
+                        </div>
+                        <div class="card-header card-header-chat bg-dark" style='color: white; text-align:center; margin-bottom: 10pt;'>
+                            Regular chat
+                        </div>
+                        <div id='current-chat'>
+
+                        </div>
+                    </div>
+                </div>
+            
+            </div>   
+            
+
+            <!-- Task tab -->
+            
+            <div class = 'text-element tab-pane question-list' id="history-questions">
+
+            </div>
+
+
+            <script>
+                $(document).ready(function() {
+                    // Interactivity
+
+                    $("#nav-current").on("click", function() {
+                        $("#current-questions").show();
+                        $("#chat-col").show();
+                        $("#history-questions").hide();
+                        $('#nav-history').parent().removeClass('active')
+                        $(this).parent().addClass('active')
+                    })
+
+                    $("#nav-history").on("click", function() {
+                        $("#current-questions").hide();
+                        $("#chat-col").hide();
+                        $("#history-questions").show();
+                        $('#nav-current').parent().removeClass('active')
+                        $(this).parent().addClass('active')
+                    })
+
+                    $(".question-list").on("click", '.b-highlight', function(){
+                        var qele = $(this).closest('.question-element');
+                        var headerEle = qele.find('.card-header');
+                        if (headerEle.hasClass('answered')) {
+                            headerEle.removeClass('answered')
+                        }
+                        if (headerEle.hasClass('highlighted')) {
+                            headerEle.removeClass('highlighted')
+                        } else {
+                            headerEle.addClass('highlighted')
+                        }
+                    })
+
+                    $(".question-list").on("click", '.b-answered', function(){
+                        var qele = $(this).closest('.question-element');
+                        var headerEle = qele.find('.card-header');
+                        if (headerEle.hasClass('highlighted')) {
+                            headerEle.removeClass('highlighted')
+                        } 
+                        if (headerEle.hasClass('answered')) {
+                            headerEle.removeClass('answered')
+                        } else {
+                            headerEle.addClass('answered')
+                        }
+                    })
+
+                    //b-answered
+                    
+                    $(".question-list").on("click", ".b-hide", function(){
+                        var qele = $(this).closest('.question-element');
+                        var qid = qele.attr('id');
+                        qele.find('.b-hide').hide();
+                        qele.find('.b-revert').show();
+                        qele.detach().prependTo('#history-questions');
+                    })
+
+                    $(".question-list").on("click", ".b-revert", function(){
+                        var qele = $(this).closest('.question-element');
+                        var qid = qele.attr('id');
+                        qele.find('.b-hide').show();
+                        qele.find('.b-revert').hide();
+                        qele.detach().prependTo('#current-questions');
+                    })
+
+                    $("#current-chat").on("click", ".chat-mute-btn", function(){
+                        var chatele = $(this).closest('.chat-element');
+                        chatele.remove();
+                    })
+
+                    // Question input logic
+
+                    // Webcam 
+
+                    $('#b-cam').on('click', function(){
+                        $('#video-container').show();
+                        $('#b-cam').hide();
+                        $('#b-audio').show();
+                        if (navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(function (stream) {
+                            video.srcObject = stream;
+                            })
+                            .catch(function (err0r) {
+                            console.log("Something went wrong!");
+                            });
+                        }
+                    });
+
+
+                    var video = document.querySelector("#videoElement");
+
+
+
+                    //stopVideo.addEventListener("click", stop, false);
+
+                    function stop(e) {
+                        var stream = video.srcObject;
+                        var tracks = stream.getTracks();
+
+                        for (var i = 0; i < tracks.length; i++) {
+                            var track = tracks[i];
+                            track.stop();
+                        }
+
+                        video.srcObject = null;
+                    }
+
+                    // Audiometer
+
+                    var audioContext = null;
+                    var meter = null;
+                    var canvasContext = null;
+                    var HEIGHT=document.getElementById('videoElement').clientHeight;
+                    var WIDTH=1000;
+                    var rafID = null;
+                    var camHeight = 150
+
+                    $('#b-audio').on('click', function(){
+                        $('#b-audio').hide();
+                        HEIGHT=document.getElementById('videoElement').clientHeight;
+
+                        // grab our canvas
+                        canvasContext = document.getElementById( "audioMeter" ).getContext("2d");
+                        
+                        // monkeypatch Web Audio
+                        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                        audioContext = new AudioContext();
+                        audioContext.resume().then(function(){console.log('good job!')})
+                                            // Attempt to get audio input
+                        try {
+                            // monkeypatch getUserMedia
+                            navigator.getUserMedia = 
+                                navigator.getUserMedia ||
+                                navigator.webkitGetUserMedia ||
+                                navigator.mozGetUserMedia;
+
+                            // ask for an audio input
+                            navigator.getUserMedia(
+                            {
+                                "audio": {
+                                    "mandatory": {
+                                        "googEchoCancellation": "false",
+                                        "googAutoGainControl": "false",
+                                        "googNoiseSuppression": "false",
+                                        "googHighpassFilter": "false"
+                                    },
+                                    "optional": []
+                                },
+                            }, gotStream, didntGetStream);
+                        } catch (e) {
+                            alert('getUserMedia threw exception :' + e);
+                        }
+                    })
+
+                    function didntGetStream() {
+                        alert('Stream generation failed.');
+                    }
+
+                    var mediaStreamSource = null;
+
+                    function gotStream(stream) {
+                        // Create an AudioNode from the stream.
+                        mediaStreamSource = audioContext.createMediaStreamSource(stream);
+
+                        // Create a new volume meter and connect it.
+                        meter = createAudioMeter(audioContext);
+                        mediaStreamSource.connect(meter);
+
+                        // kick off the visual updating
+                        drawLoop();
+                    }
+
+                    function drawLoop( time ) {
+                        // clear the background
+                        canvasContext.clearRect(0, camHeight, WIDTH, -(HEIGHT));
+
+                        // check if we're currently clipping
+                        if (meter.checkClipping())
+                            canvasContext.fillStyle = "red";
+                        else
+                            canvasContext.fillStyle = "green";
+
+                        // draw a bar based on the current volume
+                        canvasContext.fillRect(0, camHeight, WIDTH, -(meter.volume*HEIGHT*2.5));
+                        //console.log(0-meter.volume*WIDTH*1.4)
+
+                        // set up the next visual callback
+                        rafID = window.requestAnimationFrame( drawLoop );
+                    }
+
+                    function createAudioMeter(audioContext,clipLevel,averaging,clipLag) {
+                        var processor = audioContext.createScriptProcessor(512);
+                        processor.onaudioprocess = volumeAudioProcess;
+                        processor.clipping = false;
+                        processor.lastClip = 0;
+                        processor.volume = 0;
+                        processor.clipLevel = clipLevel || 0.80;
+                        processor.averaging = averaging || 0.95;
+                        processor.clipLag = clipLag || 500;
+
+                        // this will have no effect, since we don't copy the input to the output,
+                        // but works around a current Chrome bug.
+                        processor.connect(audioContext.destination);
+
+                        processor.checkClipping =
+                            function(){
+                                if (!this.clipping)
+                                    return false;
+                                if ((this.lastClip + this.clipLag) < window.performance.now())
+                                    this.clipping = false;
+                                return this.clipping;
+                            };
+
+                        processor.shutdown =
+                            function(){
+                                this.disconnect();
+                                this.onaudioprocess = null;
+                            };
+
+                        return processor;
+                    }
+
+                    function volumeAudioProcess( event ) {
+                        var buf = event.inputBuffer.getChannelData(0);
+                        var bufLength = buf.length;
+                        var sum = 0;
+                        var x;
+
+                        // Do a root-mean-square on the samples: sum up the squares...
+                        for (var i=0; i<bufLength; i++) {
+                            x = buf[i];
+                            if (Math.abs(x)>=this.clipLevel) {
+                                this.clipping = true;
+                                this.lastClip = window.performance.now();
+                            }
+                            sum += x * x;
+                        }
+
+                        // ... then take the square root of the sum.
+                        var rms =  Math.sqrt(sum / bufLength);
+
+                        // Now smooth this out with the averaging factor applied
+                        // to the previous sample - take the max here because we
+                        // want "fast attack, slow release."
+                        this.volume = Math.max(rms, this.volume*this.averaging);
+                    }
+ 
+                });
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>

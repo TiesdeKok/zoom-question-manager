@@ -29,7 +29,7 @@
 2. Install my <b>Zoom Question Manager</b> from the Chrome Extension Store: <br><a href="https://chrome.google.com/webstore/detail/zoom-question-manager/babjamahlgjbgacemlagcpohencmghen ">Install Chrome Extension </a>
 3. You should now see a "Z" icon in the top right in Chrome <br> --> you might have to click the 3 dots to see it
 
-<h2>How to use it?<h2>
+<h2>How to use it?</h2>
 
 1. Start your zoom session as normal
 2. Find your zoom session URL <br> --> click "invite" and then "copy url" in the bottom left corner. 

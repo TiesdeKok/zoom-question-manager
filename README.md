@@ -23,8 +23,6 @@
 
 * Also provides a microphone volume meter to monitor your audio levels. If you are using a tool such as ManyCam you can also show your webcam to monitor whether you are in frame.    
 
-* Open source, find the code on the GitHub repository which is linked below.    
-
 <h2>How to install it?</h2>
 
 1. Make sure you have the Chrome browser installed on your computer

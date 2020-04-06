@@ -14,6 +14,7 @@
 </p>
 
 <h2>What does it do?</h2>
+
 * Provides a dashboard interface that sits on top of a Zoom web session. It does not communicate with any external sources, nor does it story any data. It only uses the information that is already exposed through the Chrome tab.   
 
 * Students can ask questions by prepending their question with "!question" in the Zoom chat. You can manage these questions by highlighting them as answered and moving them to the history so that they are no longer on your screen.    

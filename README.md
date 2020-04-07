@@ -10,10 +10,13 @@
   <strong>Zoom Question Manager</strong> is a Chrome Extension that provides a dashboard to manage questions aked in the Zoom chat. Primarily designed for teachers that are teaching online classes via Zoom.  <br> <br>
   <span><strong>Author:</strong> Ties de Kok (<a href="http://www.TiesdeKok.com">Personal Page</a>)</span><br>
   <span><strong>Chrome Extension: </strong><a href="https://chrome.google.com/webstore/detail/zoom-question-manager/babjamahlgjbgacemlagcpohencmghen ">Install Chrome Extension </a></span><br>
+   <span><strong>Demo & Instructions: </strong><a href="https://youtu.be/7jJ8qsYlJoA">YouTube video</a></span><br>  
 
 </p>
 
 <h2>What does it do?</h2>
+
+[![Demo](https://github.com/TiesdeKok/zoom-question-manager/blob/master/zqm.gif?raw=true)](https://youtu.be/7jJ8qsYlJoA)
 
 * Provides a dashboard interface that sits on top of a Zoom web session. It does not communicate with any external sources, nor does it story any data. It only uses the information that is already exposed through the Chrome tab.   
 
@@ -23,7 +26,8 @@
 
 * Also provides a microphone volume meter to monitor your audio levels. If you are using a tool such as ManyCam you can also show your webcam to monitor whether you are in frame.    
 
-<h2>How to install it?</h2>
+<h2>How to install it?</h2>  
+<a href="https://youtu.be/7jJ8qsYlJoA">YouTube video</a>   <br>
 
 1. Make sure you have the Chrome browser installed on your computer
 2. Install my <b>Zoom Question Manager</b> from the Chrome Extension Store: <br><a href="https://chrome.google.com/webstore/detail/zoom-question-manager/babjamahlgjbgacemlagcpohencmghen ">Install Chrome Extension </a>
@@ -47,11 +51,6 @@ If a student starts their question with  `!question` it will show up in the ques
 
 **Note: archived questions only persist for as long as the tab is open. Once you refresh/close the page everything will reset to being empty. **
 
-    pip install ipystata
-
-
-  
- 
 <h2 id="questions">Questions or Suggestions?</h2>
 
 If you have questions / experience problems / or have suggestions please use the `issues` tab of this repository.   You can also e-mail me at tdekok [at] uw.edu .

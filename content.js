@@ -9,6 +9,8 @@ var observerSmall;
 var chatWindowOpen = false;
 var most_recent_chat_box;
 var currentOwner = '';
+var receivedQuestions = [];
+var receivedChats = [];
 
 function startObservers(){
     // Close any running observers
@@ -53,6 +55,12 @@ chrome.runtime.onMessage.addListener(
                 $(data).prependTo('#extWrapper');
             });
 
+            // Close the overlay window 
+            try {$('.close-jd.tab-button').click();} catch (e) {}
+
+            // Disable video receiving to boost performance
+            try {$("a[aria-label='Disable video receiving'")[0].click();} catch (e) {}
+
             // Start observer to check whether the chat window closes
             chatWindowObserver = new MutationObserver(chatWindowCallback);
             var targetWindow = document.getElementById('wc-content');
@@ -87,11 +95,15 @@ function processChat(owner, raw_qText) {
     var timestring =  currentdate.getHours() + ":"  + minutes_with_leading_zeros(currentdate);
     var qItems = raw_qText.split(' ')
     if (qItems[0] == '!question') {
-        inputQuestion(timestring, owner, qItems.slice(1,).join(' '))
+        var msg_to_send = qItems.slice(1,).join(' ');
+        if (!receivedQuestions.includes(owner + '_' + msg_to_send)) {
+            inputQuestion(timestring, owner, msg_to_send)
+        }
     } else {
-        inputChat(timestring, owner, raw_qText)
+        if (!receivedChats.includes(owner + '_' + raw_qText)) {
+            inputChat(timestring, owner, raw_qText)
+        }
     }
-
 }
 
 function inputQuestion(time, owner, qText) {
@@ -103,6 +115,14 @@ function inputQuestion(time, owner, qText) {
         new_q_filled.find('.q-owner').html(owner)
         new_q_filled.find('.card-text').html(qText)
         $('#current-questions').prepend(new_q_filled)
+
+        // Add to list of received messages to avoid duplicates
+        receivedQuestions.push(owner + '_' + qText);
+
+        // Make sure the list doesn't explode to avoid performance issues
+        if (receivedQuestions.length > 20) {
+            receivedQuestions.shift();
+        }
     }
 }
 
@@ -119,6 +139,13 @@ function inputChat(time, owner, qText) {
         if ($('#current-chat > .chat-element').length > 10) {
             $('#current-chat > .chat-element').last().remove();
         }
+        // Add to list of received messages to avoid duplicates
+        receivedChats.push(owner + '_' + qText);
+
+        // Make sure the list doesn't explode to avoid performance issues
+        if (receivedChats.length > 20) {
+            receivedChats.shift();
+        }
     }
 }
 
@@ -126,6 +153,9 @@ function inputChat(time, owner, qText) {
 function chatWindowCallback(records){
     // Usually the video overlay will pop up, so hide if nescessary
     try {$('.video-in-sharing-container').hide()} catch (e){}
+
+    // Empty the screen sharing element to improve performance
+    try {$('.sharee-container__viewport').empty()} catch (e){}
 
     // Make sure the chat window and observers remain functional
     if (document.getElementsByClassName('chat-content__chat-scrollbar').length == 1) {

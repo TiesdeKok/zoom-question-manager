@@ -51,9 +51,38 @@ chrome.runtime.onMessage.addListener(
             // Modify body and insert the web-app HTML
             $('body').prepend('<div id="extWrapper"></div>')
             $('div.main').appendTo('#extWrapper')
-            $.get(chrome.runtime.getURL('/viewerWindow.html'), function(data) {
-                $(data).prependTo('#extWrapper');
-            });
+            var jq_path = chrome.runtime.getURL('/jquery-3.4.1.js');
+            var popper_path = chrome.runtime.getURL('/popper.min.js');
+            var bootstrap_path = chrome.runtime.getURL('/bootstrap.min.js');
+            var bootstrap_css_path = chrome.runtime.getURL('/bootstrap.min.css');
+
+            var s = document.createElement("script");
+            s.type = "text/javascript";
+            s.src = jq_path;
+            $("#extWrapper").append(s);
+
+            setTimeout(function(){
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.src = popper_path;
+                $("#extWrapper").append(s);
+    
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.src = bootstrap_path;
+                $("#extWrapper").append(s);
+    
+                var s = document.createElement("link");
+                s.rel = "stylesheet";
+                s.src = bootstrap_css_path;
+                $("#extWrapper").append(s);
+                setTimeout(function(){
+                    $.get(chrome.runtime.getURL('/viewerWindow.html'), function(data) {
+                        $(data).prependTo('#extWrapper');
+                    });
+                }, 500)
+            }, 1000)
+
 
             // Close the overlay window 
             try {$('.close-jd.tab-button').click();} catch (e) {}
@@ -182,7 +211,7 @@ function callback(records) {
             most_recent_chat_box = list[i];
             most_recent_cb_jq = $(most_recent_chat_box);
             var chat_message = most_recent_cb_jq.find('.chat-item__chat-info-msg').html();
-            var owner = most_recent_chat_box.querySelectorAll('[role="presentation"]')[1].innerHTML;
+            var owner = most_recent_chat_box.querySelectorAll('span[role="presentation"]')[0].textContent
             processChat(owner, chat_message);
             currentOwner = owner;
             try {observerSmall.disconnect();} catch (e){}

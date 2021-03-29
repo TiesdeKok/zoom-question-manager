@@ -32,9 +32,10 @@ function startObservers(){
 
         // (re-) start small chat observer
         observerSmall = new MutationObserver(callbackSmall);
-        var chat_elements = most_recent_chat_box.getElementsByClassName('chat-item__chat-info-msg');
-        var text_element_to_track = chat_elements[chat_elements.length-1];
-        observerSmall.observe(text_element_to_track , {characterData: true, attributes: false, childList: true, subtree: true });
+        //var chat_elements = most_recent_chat_box.getElementsByClassName('chat-item__chat-info-msg');
+        //var text_element_to_track = chat_elements[chat_elements.length-1];
+        var text_element_to_track = most_recent_chat_box.getElementsByClassName('chat-item__chat-info-msg-text-container')[0];
+        observerSmall.observe(text_element_to_track, { childList: true, subtree: true});
     } catch (e){
         //console.log(e)
     }
@@ -99,6 +100,10 @@ chrome.runtime.onMessage.addListener(
             if (document.getElementsByClassName('chat-content__chat-scrollbar').length == 0) {
                 $('.footer-button__chat-icon').click();
             } else {}
+
+            // Close the view button
+
+            $('div.full-screen-icon').hide();
 
             // Start chat message observers
             startObservers();
@@ -210,14 +215,18 @@ function callback(records) {
             //console.log('A new message found.')
             most_recent_chat_box = list[i];
             most_recent_cb_jq = $(most_recent_chat_box);
-            var chat_message = most_recent_cb_jq.find('.chat-item__chat-info-msg').html();
-            var owner = most_recent_chat_box.querySelectorAll('span[role="presentation"]')[0].textContent
-            processChat(owner, chat_message);
-            currentOwner = owner;
-            try {observerSmall.disconnect();} catch (e){}
-            observerSmall = new MutationObserver(callbackSmall);
-            var text_element_to_track = most_recent_chat_box.getElementsByClassName('chat-item__chat-info-msg')[0];
-            observerSmall.observe(text_element_to_track , {characterData: true, attributes: false, childList: true, subtree: true });
+            var chat_message = most_recent_cb_jq.find('.chat-item__chat-info-msg div.chat-message-text-content').html();
+            var owner = most_recent_cb_jq.find('.chat-item__chat-info-header span.chat-item__sender').html();
+
+            if (typeof chat_message !== "undefined") {
+                processChat(owner, chat_message);
+                currentOwner = owner;
+                try {observerSmall.disconnect();} catch (e){}
+                observerSmall = new MutationObserver(callbackSmall);
+                var text_element_to_track = most_recent_chat_box.getElementsByClassName('chat-item__chat-info-msg-text-container')[0];
+                observerSmall.observe(text_element_to_track, { childList: true, subtree: true});
+            }
+
         }
       }
     });
@@ -226,7 +235,9 @@ function callback(records) {
 function callbackSmall(records) {
     //console.log('A continuation message found.')
     records.forEach(function (record) {
-        var new_chat_message = record.target.textContent.split('\n').slice(-1)[0];
+        var allChatBubbles = $(record.target.innerHTML).find('div.chat-message-text-content')
+        var new_chat_message = allChatBubbles[allChatBubbles.length -1].textContent
+
         processChat(currentOwner, new_chat_message);
     });
   }
